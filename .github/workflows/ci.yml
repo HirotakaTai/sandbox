@@ -1,0 +1,112 @@
+# ============================================================
+# CI ワークフロー
+# ブランチへの push をトリガーに、
+# リント・型チェック・ビルドを実行する
+# ============================================================
+name: CI
+
+# ─── トリガー設定 ───
+on:
+  push:
+    branches:
+      - "**"
+
+# ─── 同時実行制御 ───
+# 同一ワークフロー × 同一ブランチのグループでまとめ、
+# 古い実行を自動キャンセルしてリソースを節約する
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ─── デフォルト権限 ───
+# 最小権限の原則に従い、リポジトリの読み取りのみ許可
+permissions:
+  contents: read
+
+jobs:
+  # ─────────────────────────────────────────────
+  # リント & フォーマットチェック
+  # Biome を使ってコードスタイルと静的解析を実施
+  # ─────────────────────────────────────────────
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      # リポジトリのソースコードを取得
+      - uses: actions/checkout@v4
+
+      # pnpm をインストールし、ストアをキャッシュして高速化
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          cache: true
+
+      # Node.js 環境をセットアップ
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # ロックファイルに従って依存関係をインストール (再現性を保証)
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Biome によるリント＋フォーマットの一括チェック
+      - name: Lint & format check
+        run: pnpm lint
+
+  # ─────────────────────────────────────────────
+  # TypeScript 型チェック
+  # tsc --noEmit で型エラーがないことを検証
+  # (Biome は型チェックを行わないため別ジョブで実施)
+  # ─────────────────────────────────────────────
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # TypeScript コンパイラで型チェックのみ実行 (出力ファイルは生成しない)
+      - name: Type check
+        run: pnpm type-check
+
+  # ─────────────────────────────────────────────
+  # ビルド
+  # lint と type-check が成功した後に Next.js のビルドを実行
+  # ビルドは重い処理のため、事前チェックを通過した場合のみ実行する
+  # ─────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    # lint と type-check の両方が成功した場合のみ実行
+    needs: [lint, type-check]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Next.js のプロダクションビルドを実行
+      - name: Build
+        run: pnpm build
+
