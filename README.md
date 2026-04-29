@@ -14,6 +14,10 @@
 
 - [nextjs/create-next-app](https://github.com/HirotakaTai/sandbox/tree/nextjs/create-next-app) - Next.js 初期テンプレート
 
+### Three.js
+
+- [threejs/threejs-example](https://github.com/HirotakaTai/sandbox/tree/threejs/threejs-example) - Three.js サンプル
+
 ### Claude
 
 - [claude/agent-teams](https://github.com/HirotakaTai/sandbox/tree/claude/agent-teams) - Claude エージェントチームの検証
