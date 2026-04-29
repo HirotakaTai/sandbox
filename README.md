@@ -13,3 +13,11 @@
 ### Next.js
 
 - [nextjs/create-next-app](https://github.com/HirotakaTai/sandbox/tree/nextjs/create-next-app) - Next.js 初期テンプレート
+
+### Claude
+
+- [claude/agent-teams](https://github.com/HirotakaTai/sandbox/tree/claude/agent-teams) - Claude エージェントチームの検証
+
+### その他
+
+- [develop](https://github.com/HirotakaTai/sandbox/tree/develop) - 開発用ブランチ
