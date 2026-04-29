@@ -12,6 +12,7 @@
 // ============================================================================
 
 import type { Sample } from "../core/types";
+import dodgeRunner from "../games/dodge-runner/index";
 import controls from "./controls/index";
 import lighting from "./lighting/index";
 import postprocessing from "./postprocessing/index";
@@ -20,6 +21,9 @@ import texture from "./texture/index";
 
 /**
  * UI に公開するサンプルの並び（先頭が初期表示サンプル）。
+ *
+ * `src/samples/` 配下の単機能サンプルに加えて、`src/games/` 配下の
+ * ミニゲームもここに登録します（Sample 契約は同じなので透過的）。
  */
 export const samples: readonly Sample[] = [
   rotatingCube,
@@ -27,6 +31,7 @@ export const samples: readonly Sample[] = [
   texture,
   controls,
   postprocessing,
+  dodgeRunner,
 ];
 
 // ID → Sample の高速ルックアップ用マップ。
