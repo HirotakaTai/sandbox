@@ -1,60 +1,73 @@
-import "./style.css";
-import heroImg from "./assets/hero.png";
-import typescriptLogo from "./assets/typescript.svg";
-import viteLogo from "./assets/vite.svg";
-import { setupCounter } from "./counter.ts";
+// ============================================================================
+// main.ts — アプリのエントリポイント
+// ----------------------------------------------------------------------------
+// 役割は「3 つのコンポーネントを配線する」ことだけです。
+//
+//   - layout    : DOM ツリー（サイドバー / canvas ホスト / メタバー）
+//   - runtime   : 共有レンダラ + アニメーションループ
+//   - router    : URL ハッシュとサンプル ID の対応
+//
+// 配線の流れ:
+//   ① layout を組み立て、サイドバー上のクリック → router.navigate(id)
+//   ② router を起動。ハッシュが変わるたびに activate(id) が呼ばれる
+//   ③ activate(id) は registry から Sample を引いて runtime.setSample(...)
+// ============================================================================
 
-document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${typescriptLogo}" class="framework" alt="TypeScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+import { mountLayout } from "./app/layout";
+import { HashRouter } from "./app/router";
+import { SampleRuntime } from "./core/sample-runtime";
+import { defaultSampleId, getSampleById, samples } from "./samples/index";
+import "./styles/app.css";
 
-<div class="ticks"></div>
+function main(): void {
+  // index.html に必ず存在するはずだが、保険として明示的に検証。
+  // 早めに失敗させたほうが学習者がエラーに気づきやすいので、
+  // 静かに何もしないのではなく throw します。
+  const root = document.getElementById("app");
+  if (!root) {
+    throw new Error("#app root element is missing from index.html");
+  }
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://www.typescriptlang.org" target="_blank">
-          <img class="button-icon" src="${typescriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+  // router を先に作ってから layout に渡す（onSelect から navigate を呼ぶため）。
+  const router = new HashRouter();
+  const layout = mountLayout(
+    root,
+    samples.map((s) => s.meta),
+    (id) => router.navigate(id),
+  );
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`;
+  const runtime = new SampleRuntime(layout.canvasHost);
 
-setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
+  /**
+   * 指定 ID のサンプルを起動します。
+   * 不明な ID が来たときは「デフォルトサンプル」へフォールバックします。
+   */
+  function activate(id: string): void {
+    const sample = getSampleById(id) ?? getSampleById(defaultSampleId);
+    if (!sample) return;
+
+    if (sample.meta.id !== id) {
+      // 不明 ID をユーザに教えるより、URL を正規化して再度ナビゲートさせる
+      // ほうが体験が一貫します。hashchange → activate が再度呼ばれます。
+      router.navigate(sample.meta.id);
+      return;
+    }
+
+    runtime.setSample(sample);
+    layout.setActive(sample.meta.id);
+    layout.updateMetadata(sample.meta);
+    document.title = `${sample.meta.title} | Three.js 学習サンプル`;
+  }
+
+  // router.start() は、起動直後にも一度コールバックを呼びます。
+  // ハッシュが空ならデフォルトサンプルへ navigate（→ 再度 activate）。
+  router.start((id) => {
+    if (!id) {
+      router.navigate(defaultSampleId);
+      return;
+    }
+    activate(id);
+  });
+}
+
+main();
