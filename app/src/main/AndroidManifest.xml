@@ -2,7 +2,25 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--
+        ローカル通知に必須の権限。
+        Android 13 (API 33) 以降は dangerous permission となり、
+        ContextCompat.checkSelfPermission / ActivityResultContracts.RequestPermission
+        によるランタイムリクエストが必要。
+        API 32 以下では宣言のみで自動許可される。
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+        Step 7: WorkManager を利用した予約通知のために宣言。
+        WorkManager 内部のスケジューリングや低 API での AlarmManager フォールバック時に使われる。
+        本サンプルは inexact なスケジュールに留め、
+        SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM は使用しない方針 (Android 14 以降の取得困難化対策)。
+    -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
+        android:name=".LocalNotificationApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -10,16 +28,31 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LocalNotification">
+        android:theme="@style/Theme.LocalNotification"
+        tools:targetApi="34">
+
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.LocalNotification">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+            Step 4: 通知アクション (例: 「既読にする」「返信」) を受け取る BroadcastReceiver。
+            通知 trampoline (Receiver/Service 経由で Activity を開く行為) は
+            Android 12+ で禁止されているため、この Receiver は Activity を起動せず
+            状態更新と通知の dismiss / 更新のみを行う。
+            exported=false: 自アプリ内からの explicit Intent のみ受け付ける。
+        -->
+        <receiver
+            android:name=".notification.NotificationActionReceiver"
+            android:exported="false" />
+
     </application>
 
 </manifest>

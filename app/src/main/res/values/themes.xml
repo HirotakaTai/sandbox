@@ -1,9 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.LocalNotification" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <!--
+        Compose で UI を組むため Activity 側のテーマは最小限で OK。
+        Material View ライブラリ (com.google.android.material) を依存から外したため、
+        framework 同梱の Material テーマを継承する。
+        実際の見栄えは MaterialTheme (Compose 側) で制御する。
+    -->
+    <style name="Theme.LocalNotification" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor" tools:targetApi="21">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
     </style>
-
-    <style name="Theme.LocalNotification" parent="Base.Theme.LocalNotification" />
 </resources>

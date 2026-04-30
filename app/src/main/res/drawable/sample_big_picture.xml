@@ -1,0 +1,23 @@
+<!--
+    Step 3 BigPictureStyle 用のサンプル画像 (ベクター)。
+    実プロダクトでは drawable-nodpi 配下に PNG/WebP を置くことが多いが、
+    学習用にベクターでサイズを抑える。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <path
+        android:fillColor="#1976D2"
+        android:pathData="M0,0h320v180h-320z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M160,60c-22,0 -40,18 -40,40s18,40 40,40 40,-18 40,-40 -18,-40 -40,-40zM160,128c-15.5,0 -28,-12.5 -28,-28s12.5,-28 28,-28 28,12.5 28,28 -12.5,28 -28,28z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M156,84h8v32h-8z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M156,116h8v8h-8z" />
+</vector>
