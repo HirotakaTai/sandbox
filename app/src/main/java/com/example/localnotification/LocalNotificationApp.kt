@@ -15,6 +15,10 @@ import com.example.localnotification.notification.NotificationChannelRegistrar
  * - Hilt 等の DI を導入していない学習用構成のため、依存はクラス変数として手動配線する。
  */
 class LocalNotificationApp : Application() {
+    /**
+     * アプリプロセス起動時に 1 回だけ呼ばれる。
+     * ここで NotificationChannel を登録しておくと、以降の notify() が確実に表示される。
+     */
     override fun onCreate() {
         super.onCreate()
         NotificationChannelRegistrar.registerAll(this)

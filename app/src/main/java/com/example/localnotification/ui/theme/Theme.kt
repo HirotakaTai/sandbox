@@ -38,6 +38,13 @@ private val LightColors = lightColorScheme(
     surface = Color(0xFFFFFFFF),
 )
 
+/**
+ * アプリ全体の Material 3 テーマを適用するルート Composable。
+ *
+ * @param darkTheme ダークテーマを使うか。デフォルトではシステム設定に合わせる。
+ * @param dynamicColor Material You (Android 12+) の壁紙連動色を使うか。
+ * @param content テーマ適用下で表示したい Composable ツリー。
+ */
 @Composable
 fun LocalNotificationTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -55,6 +62,9 @@ fun LocalNotificationTheme(
 
     val view = LocalView.current
     if (!view.isInEditMode) {
+        // SideEffect: コンポジションが成功した後に 1 回だけ呼ばれるブロック。
+        // Compose の状態を外部システム (ここでは Window) に反映させるために使う。
+        // ステータスバーを背景色に揃え、アイコン色をダーク/ライトで切り替える。
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()

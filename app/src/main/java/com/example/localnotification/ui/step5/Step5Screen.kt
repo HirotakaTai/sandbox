@@ -26,6 +26,18 @@ import com.example.localnotification.ui.common.StepScaffold
 import com.example.localnotification.ui.common.rememberNotificationPermissionState
 import kotlinx.coroutines.delay
 
+/**
+ * Step 5: 進捗通知をシミュレートする画面。
+ *
+ * 「開始」ボタンで 0→100% まで 500ms ごとに同じ通知 ID で更新し、完了時に「完了」通知に差し替える。
+ *
+ * **学習ポイント (LaunchedEffect)**:
+ * - `running` の値が変わるたびにブロックが再実行される (true → false → true でコルーチンがキャンセルされ、新しいコルーチンで進捗をスタート)。
+ * - 本番アプリで長期間動く処理をさせるなら ViewModel + WorkManager / Service へ移した方が良い。
+ *   ここでは「同じ ID で更新される」という動作を艸道に見せたいため LaunchedEffect にしている。
+ *
+ * @param onBack 戻るボタン押下時のコールバック。
+ */
 @Composable
 fun Step5Screen(onBack: () -> Unit) {
     val context = LocalContext.current

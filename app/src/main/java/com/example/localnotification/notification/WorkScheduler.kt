@@ -19,6 +19,12 @@ import kotlinx.coroutines.flow.map
  */
 class WorkScheduler(private val context: Context) {
 
+    /**
+     * `seconds` 秒後に通知を発行するジョブをスケジュールする。
+     *
+     * - WorkManager は **不正確 (inexact)** なため、Doze 中は指定秒数から数分ずれることがある。
+     * - REPLACE ポリシーにより、すでに同名の Work があれば古い方をキャンセルして上書きする。
+     */
     fun scheduleNotificationIn(seconds: Long) {
         val request = OneTimeWorkRequestBuilder<NotificationWorker>()
             .setInitialDelay(seconds, TimeUnit.SECONDS)
@@ -30,13 +36,20 @@ class WorkScheduler(private val context: Context) {
         )
     }
 
+    /**
+     * スケジュールされているジョブをキャンセルする。
+     * すでに実行済みだった場合は何も起きない。
+     */
     fun cancel() {
         WorkManager.getInstance(context).cancelUniqueWork(NotificationWorker.UNIQUE_WORK_NAME)
     }
 
     /**
-     * UI から observe するための State Flow。
-     * `null` は未スケジュール、それ以外は最新の WorkInfo.State を返す。
+     * UI から observe するための Flow。
+     *
+     * @return WorkInfo.State をストリームする。未スケジュール時は `null`、
+     * それ以外は ENQUEUED / RUNNING / SUCCEEDED / CANCELLED などの状態。
+     * Compose 側では `collectAsStateWithLifecycle` と組み合わせて使う。
      */
     fun observeState(): Flow<WorkInfo.State?> {
         return WorkManager.getInstance(context)

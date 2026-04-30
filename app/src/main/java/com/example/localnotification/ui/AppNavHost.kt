@@ -35,6 +35,12 @@ object Routes {
     const val STEP7 = "step7"
 }
 
+/**
+ * アプリ全体の Navigation グラフを構築するルート Composable。
+ *
+ * @param navController 上位 ([MainActivity]) で `rememberNavController()` で生成したインスタンス。
+ * 通知タップの deep link は Activity がこの navController に対して `navigate(route)` を呼ぶことで実現される。
+ */
 @Composable
 fun AppNavHost(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Routes.HOME) {

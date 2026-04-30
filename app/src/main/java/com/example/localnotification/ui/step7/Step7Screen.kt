@@ -19,10 +19,21 @@ import com.example.localnotification.ui.common.PermissionStatusCard
 import com.example.localnotification.ui.common.StepScaffold
 import com.example.localnotification.ui.common.rememberNotificationPermissionState
 
+/**
+ * Step 7: WorkManager を使った 10 秒後の予約通知を試す画面。
+ *
+ * **学習ポイント**:
+ * - `collectAsStateWithLifecycle` は Activity/Fragment のライフサイクルを考慮して collect を自動で
+ *   中断/再開するため、バックグラウンドで不必要なリソースを使わない (`collectAsState` より推奨)。
+ * - WorkManager は Doze 中も動くが、タイミングは不正確 (指定秒数から数分ずれることがある)。
+ *
+ * @param onBack 戻るボタン押下時のコールバック。
+ */
 @Composable
 fun Step7Screen(onBack: () -> Unit) {
     val context = LocalContext.current
     val permission = rememberNotificationPermissionState()
+    // remember(scheduler): scheduler インスタンスをコンポジション間で保持し、再生成を防ぐ。
     val scheduler = remember { WorkScheduler(context) }
     val state by scheduler.observeState().collectAsStateWithLifecycle(initialValue = null)
 
@@ -50,6 +61,7 @@ fun Step7Screen(onBack: () -> Unit) {
     }
 }
 
+/** WorkInfo の状態を画面表示用の文字列リソース ID に変換する拡張関数。 */
 private fun WorkInfo.State?.toLabelRes(): Int = when (this) {
     WorkInfo.State.ENQUEUED, WorkInfo.State.BLOCKED -> R.string.step7_status_enqueued
     WorkInfo.State.RUNNING -> R.string.step7_status_running

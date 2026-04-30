@@ -20,7 +20,19 @@ import com.example.localnotification.R
  */
 object NotificationChannelRegistrar {
 
+    /**
+     * アプリで使うすべての通知チャンネルを OS に登録する。
+     *
+     * - 同じ ID で何度呼んでも安全 (no-op)。アプリ起動のたびに呼んで OK。
+     * - ユーザーが OS 設定で変更した値 (音、重要度など) は **後から上書きできない**。
+     *   呼び出してもユーザー設定が初期化されることはない。
+     * - チャンネルを追加・削除したい場合は、新しい ID で作成 / `deleteNotificationChannel` で削除する。
+     *
+     * 通常は [LocalNotificationApp.onCreate] から呼ばれる。
+     */
     fun registerAll(context: Context) {
+        // NotificationManagerCompat: API レベルの違いを吸収する AndroidX のラッパー。
+        // API 26 未満では内部的に no-op になる。
         val manager = NotificationManagerCompat.from(context)
 
         val basic = NotificationChannelCompat.Builder(

@@ -27,6 +27,12 @@ object NotificationBuilders {
     // ====================================================
     // Step 1: 最小構成の通知
     // ====================================================
+    /**
+     * 何もせずただ表示するだけの最小通知を組み立てる。
+     *
+     * - `setSmallIcon` は **必須**。指定しないと `notify()` で例外/サイレント失敗になる。
+     * - `setAutoCancel(true)` でタップ時に通知が自動的に消える。
+     */
     fun buildBasic(context: Context): Notification {
         return NotificationCompat.Builder(context, NotificationIds.CHANNEL_BASIC)
             // setSmallIcon は必須。これが無いと post 自体が失敗する。
@@ -41,6 +47,16 @@ object NotificationBuilders {
     // ====================================================
     // Step 2: タップで Activity を開く通知
     // ====================================================
+    /**
+     * タップすると [MainActivity] を開いて Step 2 画面へ deep link する通知。
+     *
+     * @param payload 通知タップ後に画面へ渡す任意の文字列ペイロード。
+     *
+     * **学習ポイント**:
+     * - Trampoline 禁止 (Android 12+) のため Receiver 経由ではなく `getActivity` を直接使う。
+     * - `FLAG_IMMUTABLE` は API 31+ で必須。これがないとビルド済み APK でクラッシュする。
+     * - `FLAG_UPDATE_CURRENT` は同じ `requestCode` の PendingIntent の Extras を最新値に差し替える。
+     */
     fun buildTappable(context: Context, payload: String): Notification {
         // Activity を直接開く (Trampoline 禁止)。
         val intent = Intent(context, MainActivity::class.java).apply {
@@ -69,6 +85,7 @@ object NotificationBuilders {
     // ====================================================
     // Step 3: 各種スタイル
     // ====================================================
+    /** 折りたたみ時は 1 行、展開すると複数行のテキストを表示する `BigTextStyle`。 */
     fun buildBigText(context: Context): Notification {
         val style = NotificationCompat.BigTextStyle()
             .setBigContentTitle(context.getString(R.string.step3_big_text_title))
@@ -83,6 +100,10 @@ object NotificationBuilders {
             .build()
     }
 
+    /**
+     * 展開時に大きな画像を表示する `BigPictureStyle`。
+     * `BigPictureStyle` は Bitmap を必要とするため、ここでは vector drawable を一度 Bitmap にラスタライズしている。
+     */
     fun buildBigPicture(context: Context): Notification {
         // ベクタードローアブルを Bitmap 化 (BigPictureStyle は Bitmap 必須)。
         val drawable = checkNotNull(
@@ -110,6 +131,10 @@ object NotificationBuilders {
             .build()
     }
 
+    /**
+     * 複数行を箇条書き表示する `InboxStyle`。
+     * メール一覧やメッセージ一覧の集約表示に向く。
+     */
     fun buildInbox(context: Context): Notification {
         val style = NotificationCompat.InboxStyle()
             .setBigContentTitle(context.getString(R.string.step3_inbox_title))
@@ -130,15 +155,28 @@ object NotificationBuilders {
     // ====================================================
     // Step 4: アクション + RemoteInput (返信)
     // ====================================================
+    /** 「既読にする」アクションを区別するための Intent action 文字列。 */
     const val ACTION_MARK_READ = "com.example.localnotification.action.MARK_READ"
+    /** 「返信」アクション (RemoteInput 入力欄付き) を区別するための Intent action 文字列。 */
     const val ACTION_REPLY = "com.example.localnotification.action.REPLY"
+    /** Receiver 側で対象通知を識別するために Intent extra に入れる通知 ID キー。 */
     const val EXTRA_NOTIF_ID = "extra_notif_id"
+    /** RemoteInput が返信テキストを格納する Bundle のキー。Builder と取得側で同じ値を使う。 */
     const val KEY_TEXT_REPLY = "key_text_reply"
 
-    // Activity ↔ Step 起動用の追加 Extras (Step 2 / Step 4 で利用)
+    /** 通知タップ時に MainActivity が読み取って遷移先を判定するルート文字列キー。 */
     const val EXTRA_NAV_ROUTE = "extra_nav_route"
+    /** Step 2 で「タップで運ばれてきたペイロード」を Activity に渡すためのキー。 */
     const val EXTRA_PAYLOAD = "extra_payload"
 
+    /**
+     * 「既読にする」アクションと「返信」アクション (RemoteInput 付き) を含む通知を組み立てる。
+     *
+     * **学習ポイント**:
+     * - 既読アクションは `getBroadcast` で BroadcastReceiver に飛ばす (画面を開かないので trampoline 規制対象外)。
+     * - 返信アクション側だけは `FLAG_MUTABLE` を使う。OS が RemoteInput の入力テキストを Intent に注入する必要があるため。
+     * - 他の PendingIntent は `FLAG_IMMUTABLE` のまま。安易に MUTABLE を広げないこと。
+     */
     fun buildWithActions(context: Context): Notification {
         // 1) 既読アクション → BroadcastReceiver で完結 (Activity を開かない = trampoline 違反にならない)
         val markReadIntent = Intent(context, NotificationActionReceiver::class.java).apply {
@@ -195,6 +233,14 @@ object NotificationBuilders {
     // ====================================================
     // Step 5: 進捗通知
     // ====================================================
+    /**
+     * 進捗バー付き通知を組み立てる。同じ通知 ID で繰り返し `notify()` することで更新する。
+     *
+     * @param progress 現在の進捗値 (0..max)。
+     * @param max 進捗の最大値。デフォルト 100 (= パーセント表現)。
+     *
+     * `setOnlyAlertOnce(true)` で更新時に音が鳴らないようにする (頻繁に呼んでも UX を壊さない)。
+     */
     fun buildProgress(context: Context, progress: Int, max: Int = 100): Notification {
         return NotificationCompat.Builder(context, NotificationIds.CHANNEL_BASIC)
             .setSmallIcon(R.drawable.ic_notification)
@@ -207,6 +253,10 @@ object NotificationBuilders {
             .build()
     }
 
+    /**
+     * 進捗 100% 到達時に [buildProgress] が出していた通知を「完了」表示で上書きする。
+     * `setProgress(0, 0, false)` で進捗バーを消すのが定石。
+     */
     fun buildProgressComplete(context: Context): Notification {
         return NotificationCompat.Builder(context, NotificationIds.CHANNEL_BASIC)
             .setSmallIcon(R.drawable.ic_notification)
@@ -221,6 +271,12 @@ object NotificationBuilders {
     // ====================================================
     // Step 6: グループ通知
     // ====================================================
+    /**
+     * グループに属する子通知を組み立てる。同じ `setGroup(...)` キーを持つ通知が束ねられる。
+     *
+     * @param sender 表示用の送信者名。
+     * @param message 表示用の本文。
+     */
     fun buildGroupedChild(context: Context, sender: String, message: String): Notification {
         return NotificationCompat.Builder(context, NotificationIds.CHANNEL_GROUPED)
             .setSmallIcon(R.drawable.ic_notification)
@@ -231,6 +287,11 @@ object NotificationBuilders {
             .build()
     }
 
+    /**
+     * グループの「代表」となるサマリー通知。
+     * 子通知をすべて `notify()` した **後** にこれを発行することで、Android 7+ の自動グルーピングが正しく働く。
+     * `setGroupSummary(true)` を必ず指定すること。これが summary であることの目印になる。
+     */
     fun buildGroupedSummary(context: Context): Notification {
         // サマリー通知: グループの代表として表示される (Android 7+ で自動展開可)。
         val style = NotificationCompat.InboxStyle()
@@ -253,6 +314,10 @@ object NotificationBuilders {
     // ====================================================
     // Step 7: 予約通知 (WorkManager から呼び出される)
     // ====================================================
+    /**
+     * [NotificationWorker] が `doWork()` の中で組み立てて発行する予約通知。
+     * タップで Step 7 画面に戻れるよう、deep link 用の extra を入れている。
+     */
     fun buildScheduled(context: Context): Notification {
         // 通知タップで MainActivity に戻す (ペイロードで Step 7 画面に遷移)。
         val intent = Intent(context, MainActivity::class.java).apply {

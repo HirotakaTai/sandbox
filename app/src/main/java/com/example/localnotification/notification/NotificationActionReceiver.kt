@@ -26,6 +26,16 @@ import com.example.localnotification.notification.NotificationBuilders.KEY_TEXT_
  * ここでは I/O などの重い処理を行わない。
  */
 class NotificationActionReceiver : BroadcastReceiver() {
+    /**
+     * 通知のアクション (既読 / 返信) が送られたときに呼ばれる。
+     *
+     * **重要な制約**:
+     * - このメソッドは **メインスレッド + 数秒以内に return** しないと ANR になる。
+     *   重い I/O が必要なら `goAsync()` や WorkManager に託すこと。
+     * - ここから Activity を起動してはいけない (Trampoline 禁止 / Android 12+)。
+     *   画面への遷移が必要なアクションは Receiver ではなく、
+     *   通知本体の contentIntent (PendingIntent.getActivity) で表現する。
+     */
     override fun onReceive(context: Context, intent: Intent) {
         val notifId = intent.getIntExtra(EXTRA_NOTIF_ID, -1)
         val poster = NotificationPoster(context)
@@ -36,6 +46,8 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 poster.cancel(notifId)
             }
             ACTION_REPLY -> {
+                // RemoteInput.getResultsFromIntent: OS が入力テキストを入れて返してくる。
+                // この API に渡すのは Receiver に渡されたオリジナルの intent (加工したものではない)。
                 val reply = RemoteInput.getResultsFromIntent(intent)
                     ?.getCharSequence(KEY_TEXT_REPLY)
                     ?.toString()
@@ -58,6 +70,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
     }
 
     companion object {
+        /** Logcat でフィルタしやすいよう 23 文字以内の TAG を使う (古い Android の制限)。 */
         private const val TAG = "NotifActionReceiver"
     }
 }

@@ -16,12 +16,18 @@ import com.example.localnotification.ui.common.PermissionStatusCard
 import com.example.localnotification.ui.common.StepScaffold
 import com.example.localnotification.ui.common.rememberNotificationPermissionState
 
+/** Step 6 のサンプルメッセージ一覧。上から子通知 1、3、そしてサマリーとして集約表示される。 */
 private val sampleMessages = listOf(
     "tanaka" to "明日の MTG ですが…",
     "suzuki" to "議事録を共有しました。",
     "yamada" to "例の件、進捗どうですか?",
 )
 
+/**
+ * Step 6: グループ通知 (子 + サマリー) を表示・一括クリアする画面。
+ *
+ * @param onBack 戻るボタン押下時のコールバック。
+ */
 @Composable
 fun Step6Screen(onBack: () -> Unit) {
     val context = LocalContext.current

@@ -30,15 +30,11 @@ import com.example.localnotification.R
 import com.example.localnotification.notification.NotificationPoster
 
 /**
- * POST_NOTIFICATIONS 権限の状態を保持・操作する Compose state ホルダー。
+ * POST_NOTIFICATIONS 権限の状態と launcher をまとめたデータクラス。
  *
- * **設計方針**:
- * - Composable 関数として状態と launcher を提供する。
- * - 拒否された場合は設定アプリへの導線を表示する (2 回拒否されると OS が二度と尋ねない)。
- *
- * **API ガード**:
- * - API 32 以下では権限は自動許可されるため、launcher を呼ぶ必要はない。
- *   それでも launcher 自体は安全に呼べる (no-op) ように残してある。
+ * @property isGranted 現在権限が許可されているか。
+ * @property showRationale 1 回以上拒否されたか (= rationale を見せるべきか)。
+ * @property request システムの権限ダイアログを起動するトリガー。API 32 以下ではスタブとして許可扱いにする。
  */
 class PermissionState internal constructor(
     val isGranted: Boolean,
@@ -46,9 +42,19 @@ class PermissionState internal constructor(
     val request: () -> Unit,
 )
 
+/**
+ * Composable から使える POST_NOTIFICATIONS 権限ホルダーを生成する。
+ *
+ * **学習ポイント**:
+ * - `rememberLauncherForActivityResult` はコンポジションのライフサイクルに紐付く、
+ *   Activity の onCreate 以前に launcher を登録しておく面倒な作業を Compose が代行してくれる。
+ * - 2 回連続で拒否されると OS は以降ダイアログを表示しないため、
+ *   ユーザーを設定アプリへ誘導する動線が必要になる ([PermissionStatusCard] を参照)。
+ */
 @Composable
 fun rememberNotificationPermissionState(): PermissionState {
     val context = LocalContext.current
+    // remember + mutableStateOf: コンポジション間で状態を保持し、値が変われば再コンポジションさせる。
     var granted by remember { mutableStateOf(NotificationPoster.hasPostPermission(context)) }
     var showRationale by remember { mutableStateOf(false) }
 
@@ -75,8 +81,10 @@ fun rememberNotificationPermissionState(): PermissionState {
 }
 
 /**
- * 各 Step 画面の上部に表示する権限ステータスカード。
- * 未許可ならリクエスト導線、拒否済みなら設定アプリへの導線を表示する。
+ * 権限未許可時に画面上部に表示するステータスカード。
+ *
+ * - `state.isGranted == true` なら何も描画しない (early return)。
+ * - 1 回拒否済みのときは、システムダイアログが二度と出ないため設定アプリへの導線に切り替える。
  */
 @Composable
 fun PermissionStatusCard(

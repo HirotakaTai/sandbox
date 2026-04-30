@@ -19,20 +19,33 @@ import kotlinx.coroutines.flow.asSharedFlow
  */
 object NotificationEvents {
 
+    /** UI 側に伝える出来事の型。`when` で網羅性チェックが効くよう sealed interface にしている。 */
     sealed interface Event {
+        /** 既読アクションが押された (Step 4)。 */
         data class MarkedRead(val notificationId: Int) : Event
+        /** RemoteInput で返信が送信された (Step 4)。 */
         data class Replied(val notificationId: Int, val text: String) : Event
     }
 
+    // replay=0 → 後から collect しても過去のイベントは流れない (一過性のシグナル)。
+    // extraBufferCapacity=16 → 観測者がいなくても 16 件まではバッファされる。
+    // DROP_OLDEST → 溢れたら古い方を捨てる (UI 不在時にメモリが膨らむのを防ぐ)。
     private val _events = MutableSharedFlow<Event>(
         replay = 0,
         extraBufferCapacity = 16,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
+
+    /** UI 側で `events.collect { }` するための公開 Flow。書き込みはできない (asSharedFlow 経由)。 */
     val events: SharedFlow<Event> = _events.asSharedFlow()
 
+    /**
+     * イベントを送信する。BroadcastReceiver や Worker など suspend 関数を呼べない場所からも安全に呼べる。
+     *
+     * tryEmit を使う理由: emit() は suspend 関数なので非 suspend な onReceive() からは呼べない。
+     * tryEmit は同期メソッドで、バッファに余裕があれば即座に送り、なければ false を返す。
+     */
     fun emit(event: Event) {
-        // tryEmit は同期で送れる (suspending API を呼べない場所からの emit に必須)。
         _events.tryEmit(event)
     }
 }

@@ -22,6 +22,7 @@ import com.example.localnotification.ui.Routes
 import com.example.localnotification.ui.common.PermissionStatusCard
 import com.example.localnotification.ui.common.rememberNotificationPermissionState
 
+/** ホーム画面で表示する 1 つの Step エントリ。タイトル/説明は文字列リソース ID で保持する。 */
 private data class StepEntry(
     val route: String,
     val titleRes: Int,
@@ -38,6 +39,11 @@ private val steps = listOf(
     StepEntry(Routes.STEP7, R.string.step7_title, R.string.step7_description),
 )
 
+/**
+ * ホーム画面。権限ステータスと各 Step へのナビゲーションリンクを表示する。
+ *
+ * @param onSelectStep Step カードタップ時のコールバック。遷移先の route 文字列を受け取る。
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(onSelectStep: (String) -> Unit) {
@@ -69,6 +75,7 @@ fun HomeScreen(onSelectStep: (String) -> Unit) {
     }
 }
 
+/** 各 Step へのナビゲーションを提供するタップ可能なカード (Material 3 Card)。 */
 @Composable
 private fun StepCard(title: String, description: String, onClick: () -> Unit) {
     Card(

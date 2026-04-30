@@ -29,6 +29,15 @@ class NotificationWorker(
     params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
 
+    /**
+     * WorkManager がスケジュールしたタイミング (initialDelay 経過後) に呼ばれる。
+     *
+     * - このメソッドはバックグラウンドスレッドで走る。
+     * - 10 分以上かかる処理は Foreground Service にしないと OS に殺される。
+     *   本サンプルは通知 1 発だけなので 1 秒もかからず、OK。
+     * - 成功 / 失敗を [Result] で返す。Result.failure() ではそのジョブだけ中止、
+     *   Result.retry() だと backoff policy に従って再試行される。
+     */
     override suspend fun doWork(): Result {
         val poster = NotificationPoster(applicationContext)
         // 権限が無ければ post は no-op。WorkManager 自体は成功扱いにして再試行を防ぐ。
@@ -38,6 +47,11 @@ class NotificationWorker(
     }
 
     companion object {
+        /**
+         * `enqueueUniqueWork` に渡すユニーク名。
+         * 同名の Work を REPLACE ポリシーで上書きすることで、
+         * ボタン連打してもスケジュールは 1 件に保たれる。
+         */
         const val UNIQUE_WORK_NAME = "step7_scheduled_notification"
     }
 }

@@ -18,10 +18,19 @@ import com.example.localnotification.ui.common.PermissionStatusCard
 import com.example.localnotification.ui.common.StepScaffold
 import com.example.localnotification.ui.common.rememberNotificationPermissionState
 
+/**
+ * Step 2: タップして Activity に戻ってくるディープリンク付き通知を試す画面。
+ *
+ * ボタン押下ごとに counter をインクリメントし、ペイロード `tap-#N` を通知に詰める。
+ * 通知タップで MainActivity が起動され、この画面に戻ってくる (deeplink: "step2")。
+ *
+ * @param onBack 戻るボタン押下時のコールバック。
+ */
 @Composable
 fun Step2Screen(onBack: () -> Unit) {
     val context = LocalContext.current
     val permission = rememberNotificationPermissionState()
+    // mutableIntStateOf: Int 専用で boxing を避けられる効率的な状態ホルダー。
     var counter by remember { mutableIntStateOf(0) }
 
     StepScaffold(

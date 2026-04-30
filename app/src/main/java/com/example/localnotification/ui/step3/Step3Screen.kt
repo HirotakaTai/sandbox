@@ -18,6 +18,11 @@ import com.example.localnotification.ui.common.PermissionStatusCard
 import com.example.localnotification.ui.common.StepScaffold
 import com.example.localnotification.ui.common.rememberNotificationPermissionState
 
+/**
+ * Step 3: 3 つのスタイル (BigText / BigPicture / Inbox) をそれぞれ試せる画面。
+ *
+ * @param onBack 戻るボタン押下時のコールバック。
+ */
 @Composable
 fun Step3Screen(onBack: () -> Unit) {
     val context = LocalContext.current

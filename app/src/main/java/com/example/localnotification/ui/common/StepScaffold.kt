@@ -24,8 +24,14 @@ import com.example.localnotification.R
 
 /**
  * 各 Step 画面で使う共通 Scaffold。
- * - TopAppBar に戻るボタン
- * - 縦スクロール対応 + Material 3 の余白規約
+ *
+ * @param title TopAppBar に表示するタイトル。
+ * @param description 画面上部に表示する説明文。
+ * @param onBack 戻るボタン押下時のコールバック。
+ * @param content 説明文の下に配置する画面固有の Composable。
+ *
+ * 内部で `verticalScroll` を適用しているため、中に LazyColumn を入れると
+ * クラッシュする点に注意 (両方とも縦スクロールを採ろうとして競合する)。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

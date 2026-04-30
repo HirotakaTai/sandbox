@@ -20,13 +20,22 @@ import com.example.localnotification.ui.common.PermissionStatusCard
 import com.example.localnotification.ui.common.StepScaffold
 import com.example.localnotification.ui.common.rememberNotificationPermissionState
 
+/**
+ * Step 4: アクションボタン + RemoteInput での返信を試す画面。
+ *
+ * `NotificationActionReceiver` から `NotificationEvents` 経由で送られてくる
+ * 「既読」 / 「返信」イベントを画面上に表示する。
+ *
+ * @param onBack 戻るボタン押下時のコールバック。
+ */
 @Composable
 fun Step4Screen(onBack: () -> Unit) {
     val context = LocalContext.current
     val permission = rememberNotificationPermissionState()
     var lastEvent by remember { mutableStateOf<String?>(null) }
 
-    // Receiver から流れてくるイベントを観測 (collect は LaunchedEffect でライフサイクル管理)
+    // LaunchedEffect(Unit): この Composable が初めてコンポジションされたときに 1 回だけコルーチンを起動する。
+    // collect はサスペンされるため、画面を離れるとスコープごとキャンセルされ、リークしない。
     LaunchedEffect(Unit) {
         NotificationEvents.events.collect { event ->
             lastEvent = when (event) {

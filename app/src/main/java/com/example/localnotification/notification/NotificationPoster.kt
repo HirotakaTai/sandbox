@@ -41,11 +41,18 @@ class NotificationPoster(private val context: Context) {
         }
     }
 
+    /**
+     * 指定 ID (とオプションの tag) の通知を消去する。
+     *
+     * - すでに表示されていない ID を渡しても安全 (例外にはならない)。
+     * - グループ通知 (Step 6) では、子をすべて cancel した後、別途 summary も cancel する必要がある。
+     */
     fun cancel(id: Int, tag: String? = null) {
         val nm = NotificationManagerCompat.from(context)
         if (tag == null) nm.cancel(id) else nm.cancel(tag, id)
     }
 
+    /** このアプリが発行したすべての通知を一括消去する。デバッグやリセット時に便利。 */
     fun cancelAll() = NotificationManagerCompat.from(context).cancelAll()
 
     companion object {

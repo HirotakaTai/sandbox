@@ -17,12 +17,16 @@ package com.example.localnotification.notification
 object NotificationIds {
 
     // ===== Channel IDs =====
-    const val CHANNEL_BASIC = "channel_basic"        // Step 1〜3, 5
-    const val CHANNEL_ACTIONS = "channel_actions"    // Step 4
-    const val CHANNEL_GROUPED = "channel_grouped"    // Step 6
-    const val CHANNEL_SCHEDULED = "channel_scheduled" // Step 7
+    // チャンネル ID は文字列。ユーザーが OS 設定で行った調整 (音/振動/重要度) の
+    // 永続化キーになるため、リリース後に変更してはいけない。
+    const val CHANNEL_BASIC = "channel_basic"        // Step 1〜3, 5 で使う「ふつうの通知」
+    const val CHANNEL_ACTIONS = "channel_actions"    // Step 4 のヘッドアップ通知 (重要度 HIGH)
+    const val CHANNEL_GROUPED = "channel_grouped"    // Step 6 のグループ化された通知
+    const val CHANNEL_SCHEDULED = "channel_scheduled" // Step 7 の予約 (WorkManager) 通知
 
     // ===== Notification IDs =====
+    // 整数。同じ ID で notify() すると **更新** になり、違う ID なら新しい通知として並ぶ。
+    // 「進捗を更新する」ような場面 (Step 5) では同 ID を使い回すのがコツ。
     const val NOTIF_STEP1_BASIC = 1001
     const val NOTIF_STEP2_TAP = 1002
     const val NOTIF_STEP3_BIG_TEXT = 1003
@@ -32,8 +36,11 @@ object NotificationIds {
     const val NOTIF_STEP5_PROGRESS = 1007
 
     // Step 6 (グループ): サマリー + 子 3 件の例
+    // 子通知の ID は CHILD_BASE + index で連番にすると更新/取消の管理が楽。
     const val NOTIF_STEP6_SUMMARY = 1100
     const val NOTIF_STEP6_CHILD_BASE = 1101 // 1101, 1102, 1103
+
+    /** Step 6 で同じグループに束ねるための識別子。子とサマリーの両方に同じ値を設定する。 */
     const val GROUP_KEY_STEP6 = "group_step6_messages"
 
     const val NOTIF_STEP7_SCHEDULED = 1200

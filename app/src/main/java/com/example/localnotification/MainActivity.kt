@@ -28,8 +28,20 @@ import com.example.localnotification.ui.theme.LocalNotificationTheme
  */
 class MainActivity : ComponentActivity() {
 
+    /**
+     * 「通知タップで渡された遷移先 route」の一時保持領域。
+     *
+     * **これを mutableStateOf にしている理由**:
+     * Compose は値の変更を検知して [LaunchedEffect] を再実行する。
+     * つまり、`onNewIntent` でこの値を更新すると自動的に navigate が走る。
+     * 通常の var だと Compose は変更を検知できないため navigate がトリガーされない。
+     */
     private var pendingDeepLink by mutableStateOf<String?>(null)
 
+    /**
+     * Activity の初期化。Compose ツリーをセットアップし、
+     * 起動時の Intent から deep link route を抽出する。
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -40,6 +52,9 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val navController = rememberNavController()
                     val deepLink = pendingDeepLink
+                    // deepLink の値が変わるたびにコルーチンを起動し、navigate を実行する。
+                    // LaunchedEffect はコンポジションのライフサイクルに縛り付いているため、
+                    // 画面を離れれば自動的にキャンセルされる (メモリリーク防止)。
                     LaunchedEffect(deepLink) {
                         if (!deepLink.isNullOrEmpty()) {
                             navController.navigate(deepLink) {
@@ -54,13 +69,21 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Activity がすでに生きている状態で Intent を受けたときに呼ばれる。
+     *
+     * `launchMode="singleTask"` (Manifest で設定済み) により、バックスタックを保ったまま起動される。
+     * その際、新しい Intent は onCreate ではなくこちらに渡されるため、
+     * ここでも deep link を取り出して pendingDeepLink を更新する必要がある。
+     */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        // singleTask で再利用される場合はここに来る。LaunchedEffect 経由で navigate する。
+        // setIntent: 以降 getIntent() したときに新しい方が返るよう上書きする。
         setIntent(intent)
         pendingDeepLink = extractRoute(intent)
     }
 
+    /** Intent extras から Navigation の遷移先 route 文字列を取り出す。無ければ null。 */
     private fun extractRoute(intent: Intent?): String? =
         intent?.getStringExtra(NotificationBuilders.EXTRA_NAV_ROUTE)
 }
