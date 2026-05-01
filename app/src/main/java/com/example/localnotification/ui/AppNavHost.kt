@@ -14,6 +14,7 @@ import com.example.localnotification.ui.step4.Step4Screen
 import com.example.localnotification.ui.step5.Step5Screen
 import com.example.localnotification.ui.step6.Step6Screen
 import com.example.localnotification.ui.step7.Step7Screen
+import com.example.localnotification.ui.step8.Step8Screen
 
 /**
  * Navigation Compose によるルート定義。
@@ -33,6 +34,7 @@ object Routes {
     const val STEP5 = "step5"
     const val STEP6 = "step6"
     const val STEP7 = "step7"
+    const val STEP8 = "step8"
 }
 
 /**
@@ -56,5 +58,6 @@ fun AppNavHost(navController: NavHostController) {
         composable(Routes.STEP5) { Step5Screen(onBack = { navController.popBackStack() }) }
         composable(Routes.STEP6) { Step6Screen(onBack = { navController.popBackStack() }) }
         composable(Routes.STEP7) { Step7Screen(onBack = { navController.popBackStack() }) }
+        composable(Routes.STEP8) { Step8Screen(onBack = { navController.popBackStack() }) }
     }
 }

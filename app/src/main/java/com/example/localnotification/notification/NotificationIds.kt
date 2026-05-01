@@ -23,6 +23,7 @@ object NotificationIds {
     const val CHANNEL_ACTIONS = "channel_actions"    // Step 4 のヘッドアップ通知 (重要度 HIGH)
     const val CHANNEL_GROUPED = "channel_grouped"    // Step 6 のグループ化された通知
     const val CHANNEL_SCHEDULED = "channel_scheduled" // Step 7 の予約 (WorkManager) 通知
+    const val CHANNEL_REMOTE = "channel_remote"      // Step 8 のリモート (FCM モック) 受信通知
 
     // ===== Notification IDs =====
     // 整数。同じ ID で notify() すると **更新** になり、違う ID なら新しい通知として並ぶ。
@@ -44,4 +45,7 @@ object NotificationIds {
     const val GROUP_KEY_STEP6 = "group_step6_messages"
 
     const val NOTIF_STEP7_SCHEDULED = 1200
+
+    /** Step 8 のリモート受信通知 (FCM モック)。同じ ID で連続受信した際は上書き表示される。 */
+    const val NOTIF_STEP8_REMOTE_BASE = 1300
 }

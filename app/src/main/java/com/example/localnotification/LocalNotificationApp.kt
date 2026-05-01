@@ -2,6 +2,9 @@ package com.example.localnotification
 
 import android.app.Application
 import com.example.localnotification.notification.NotificationChannelRegistrar
+import com.example.localnotification.notification.remote.MessagingMock
+import com.example.localnotification.notification.remote.MockMessagingService
+import com.example.localnotification.notification.remote.TopicRegistry
 
 /**
  * アプリ全体で 1 度だけ呼ばれる初期化ポイント。
@@ -15,6 +18,11 @@ import com.example.localnotification.notification.NotificationChannelRegistrar
  * - Hilt 等の DI を導入していない学習用構成のため、依存はクラス変数として手動配線する。
  */
 class LocalNotificationApp : Application() {
+
+    /** Step 8 で使うトピック購読レジストリ。Application スコープで保持する。 */
+    lateinit var topicRegistry: TopicRegistry
+        private set
+
     /**
      * アプリプロセス起動時に 1 回だけ呼ばれる。
      * ここで NotificationChannel を登録しておくと、以降の notify() が確実に表示される。
@@ -22,5 +30,10 @@ class LocalNotificationApp : Application() {
     override fun onCreate() {
         super.onCreate()
         NotificationChannelRegistrar.registerAll(this)
+
+        // Step 8: FCM モックの配線。本物の FCM では AndroidManifest 登録だけで OS が起動するが、
+        // ここでは object に Delegate を差し込むことで同等の挙動を再現する。
+        MessagingMock.setDelegate(MockMessagingService())
+        topicRegistry = TopicRegistry(this)
     }
 }

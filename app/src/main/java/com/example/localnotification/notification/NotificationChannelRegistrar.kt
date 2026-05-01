@@ -68,7 +68,16 @@ object NotificationChannelRegistrar {
             .setDescription(context.getString(R.string.channel_scheduled_desc))
             .build()
 
+        // Step 8 リモート (FCM モック): プッシュはユーザーに気づいてほしいため HIGH でヘッドアップ表示
+        val remote = NotificationChannelCompat.Builder(
+            NotificationIds.CHANNEL_REMOTE,
+            NotificationManagerCompat.IMPORTANCE_HIGH,
+        )
+            .setName(context.getString(R.string.channel_remote_name))
+            .setDescription(context.getString(R.string.channel_remote_desc))
+            .build()
+
         // createNotificationChannelsCompat は同 ID なら no-op なので毎回呼んで OK。
-        manager.createNotificationChannelsCompat(listOf(basic, actions, grouped, scheduled))
+        manager.createNotificationChannelsCompat(listOf(basic, actions, grouped, scheduled, remote))
     }
 }

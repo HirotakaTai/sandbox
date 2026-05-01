@@ -11,6 +11,8 @@
     <string name="channel_grouped_desc">Step 6: 複数通知のグループ表示学習用</string>
     <string name="channel_scheduled_name">予約通知</string>
     <string name="channel_scheduled_desc">Step 7: WorkManager による予約通知学習用</string>
+    <string name="channel_remote_name">リモート通知 (FCM モック)</string>
+    <string name="channel_remote_desc">Step 8: リモートプッシュ通知の受信を擬似的に表示するチャンネル</string>
 
     <!-- ===== ホーム画面 ===== -->
     <string name="home_title">Local Notification サンプル</string>
@@ -96,4 +98,18 @@
     <string name="step7_status_cancelled">キャンセル済み</string>
     <string name="step7_notif_title">予約通知</string>
     <string name="step7_notif_text">10 秒前に予約された通知です</string>
+
+    <!-- ===== Step 8: リモートプッシュ (FCM モック) ===== -->
+    <string name="step8_title">Step 8: リモートプッシュ (FCM モック)</string>
+    <string name="step8_description">Firebase Cloud Messaging の構造を学習用にモック実装したサンプル。トークン取得、トピック購読、通知/データメッセージ受信、deep link を擬似的に体験できます。</string>
+    <string name="step8_token_label">現在の端末トークン (タップでコピー)</string>
+    <string name="step8_regenerate_token">トークンを再生成 (onNewToken を発火)</string>
+    <string name="step8_topic_input_label">トピック名</string>
+    <string name="step8_subscribe">購読</string>
+    <string name="step8_unsubscribe">解除</string>
+    <string name="step8_subscribed_topics">購読中のトピック</string>
+    <string name="step8_simulate_notification_msg">通知メッセージを擬似受信</string>
+    <string name="step8_simulate_data_msg">データメッセージを擬似受信 (Step 2 へ deep link)</string>
+    <string name="step8_remote_notif_title">サーバーからの通知</string>
+    <string name="step8_remote_notif_body">これは FCM モックから配信されたリモート通知です。</string>
 </resources>

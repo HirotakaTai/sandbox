@@ -338,4 +338,52 @@ object NotificationBuilders {
             .setAutoCancel(true)
             .build()
     }
+
+    // ====================================================
+    // Step 8: リモート (FCM モック) 受信通知
+    // ====================================================
+    /**
+     * リモートから受信したペイロードを元に通知を組み立てる。
+     *
+     * **学習ポイント (FCM 実装との対応)**:
+     * - 本物の FCM では「通知メッセージ」は OS が自動表示するが、データメッセージや
+     *   フォアグラウンド受信時は **アプリが自分でこの種のビルダーを呼んで通知を出す** 必要がある。
+     * - `deepLinkRoute` が指定されていれば、タップで MainActivity を経由して該当画面へ遷移する。
+     * - `requestCode` を notification ID と揃えることで、複数通知が並んでもタップ Intent が混ざらない。
+     *
+     * @param notifId 通知 ID。同じ ID なら更新、違う ID なら新規通知として並ぶ。
+     * @param title リモートペイロードから取り出した表示タイトル。
+     * @param body リモートペイロードから取り出した本文。
+     * @param deepLinkRoute 指定時は通知タップで該当 route (例: "step8") に遷移する。
+     */
+    fun buildRemoteNotification(
+        context: Context,
+        notifId: Int,
+        title: String,
+        body: String,
+        deepLinkRoute: String? = null,
+    ): Notification {
+        val builder = NotificationCompat.Builder(context, NotificationIds.CHANNEL_REMOTE)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+
+        if (!deepLinkRoute.isNullOrEmpty()) {
+            val intent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra(EXTRA_NAV_ROUTE, deepLinkRoute)
+            }
+            val pi = PendingIntent.getActivity(
+                context,
+                /* requestCode = */ notifId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            builder.setContentIntent(pi)
+        }
+        return builder.build()
+    }
 }

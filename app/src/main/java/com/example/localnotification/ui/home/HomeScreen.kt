@@ -37,6 +37,7 @@ private val steps = listOf(
     StepEntry(Routes.STEP5, R.string.step5_title, R.string.step5_description),
     StepEntry(Routes.STEP6, R.string.step6_title, R.string.step6_description),
     StepEntry(Routes.STEP7, R.string.step7_title, R.string.step7_description),
+    StepEntry(Routes.STEP8, R.string.step8_title, R.string.step8_description),
 )
 
 /**
