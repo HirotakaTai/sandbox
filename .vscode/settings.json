@@ -6,5 +6,8 @@
         "~/.agents/skills": false,
         "~/.copilot/skills": false,
         "~/.claude/skills": false,
-    }
+    },
+    "chat.useClaudeMdFile": true,
+    "chat.useAgentsMdFile": true,
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true
 }
