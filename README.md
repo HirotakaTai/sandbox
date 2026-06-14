@@ -25,6 +25,19 @@
 | `create-agentsmd` | `github/awesome-copilot` | [agents.md](https://agents.md/) の公式ガイドに沿って、コーディングエージェント向けの AGENTS.md を生成する。 |
 | `documentation-writer` | `github/awesome-copilot` | [Diátaxis フレームワーク](https://diataxis.fr/)（チュートリアル / ハウツー / リファレンス / 解説）に基づいて高品質な技術ドキュメントを作成する。 |
 
+### ドキュメント参照
+
+| スキル | 提供元 | 概要 |
+| --- | --- | --- |
+| `context7-cli` | `upstash/context7` | `ctx7` CLI を使って、任意のライブラリの最新ドキュメント取得、AI コーディングスキルの管理、Context7 MCP のセットアップを行う。 |
+
+### プランニング・設計
+
+| スキル | 提供元 | 概要 |
+| --- | --- | --- |
+| `grill-me` | `mattpocock/skills` | プラン・デザインについて徹底的にインタビューして、意思決定の各ブランチを解決し共通理解に達する。ストレステストや検証に最適。 |
+| `grill-with-docs` | `mattpocock/skills` | グリリングセッション中にプランを既存ドメインモデルに対して検証し、用語をシャープにし、CONTEXT.md や ADR を更新する。 |
+
 ### スキル管理
 
 | スキル | 提供元 | 概要 |
